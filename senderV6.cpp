@@ -149,6 +149,40 @@ void handleSerial() {
       } else {
         Serial.println(">>> 格式錯誤：請使用 l [長度] (例如 l 255)");
       }
+      
+    } else if (lowerInput.startsWith("f ")) {
+      long freq = 0;
+      if (sscanf(lowerInput.c_str(), "f %ld", &freq) == 1) {
+        LoRa.idle();
+        LoRa.setFrequency(freq);
+        Serial.print("+SET_OK: Freq="); 
+        Serial.print(freq / 1E6); Serial.println("MHz");
+      }
+    } else if (lowerInput.startsWith("b ")) {
+      long bw = 0;
+      if (sscanf(lowerInput.c_str(), "b %ld", &bw) == 1) {
+        LoRa.idle();
+        LoRa.setSignalBandwidth(bw);
+        Serial.print("+SET_OK: BW="); 
+        Serial.println(bw);
+      }
+    } else if (lowerInput.startsWith("c ")) {
+      int cr = 0;
+      if (sscanf(lowerInput.c_str(), "c %d", &cr) == 1) {
+        LoRa.idle();
+        LoRa.setCodingRate4(cr);
+        Serial.print("+SET_OK: CR=4/"); 
+        Serial.println(cr);
+      }
+    } else if (lowerInput.startsWith("v ")) {
+      int sf = 0;
+      if (sscanf(lowerInput.c_str(), "v %d", &sf) == 1) {
+        if (sf >= 6 && sf <= 12) {
+          updateParams(sf);
+          Serial.print("+SET_OK: SF="); 
+          Serial.println(sf);
+        }
+      }
     } else {
       int sf = input.toInt();
       if (sf >= 6 && sf <= 12) {
@@ -166,6 +200,7 @@ void handleSerial() {
 void updateParams(int sf) {
   currentSF = sf;
   packetCounter = 0;
+  LoRa.idle();
   LoRa.setSpreadingFactor(sf);
 }
 
@@ -217,6 +252,9 @@ unsigned long getSafeInterval(int sf) {
 
 void printMenu() {
   Serial.println("\n--- 控制指令 ---");
+  Serial.println("  f [Hz]     : 設定頻率 (例如 f 915000000)");
+  Serial.println("  b [Hz]     : 設定頻寬 (例如 b 125000)");
+  Serial.println("  c [CR]     : 設定編碼率分母 (例如 c 6 表示 4/6)");
   Serial.println("  l [Len]    : 設定封包長度 (預設 256 Bytes)");
   Serial.println("  u [UUID]   : 設定當前測試 UUID");
   Serial.println("  p          : 環境測試(SF7 慢速發送)");

@@ -52,9 +52,13 @@ void setup() {
   updateParams(7);
 
   Serial.println("\n--- ESP32 接收端指令 ---");
-  Serial.println("  p    : 同步至 SF7");
-  Serial.println("  7-12 : 同步至目標 SF");
-  Serial.println("  r    : 重置統計數據");
+  Serial.println("  f [Hz]     : 設定頻率 (例如 f 915000000)");
+  Serial.println("  b [Hz]     : 設定頻寬 (例如 b 125000)");
+  Serial.println("  c [CR]     : 設定編碼率分母 (例如 c 6 表示 4/6)");
+  Serial.println("  l [Len]    : 設定封包長度 (預設 256 Bytes)");
+  Serial.println("  p          : 同步至 SF7");
+  Serial.println("  7-12       : 同步至目標 SF");
+  Serial.println("  r          : 重置統計數據");
 }
 
 void loop() {
@@ -77,6 +81,43 @@ void loop() {
           Serial.print(targetPayloadLength); Serial.println(" Bytes");
         } else {
           Serial.println(">>> 參數錯誤：長度需介於 10 到 255 Bytes 之間");
+        }
+      }
+    }
+    else if (in.startsWith("f ")) {
+      long freq = 0;
+      if (sscanf(in.c_str(), "f %ld", &freq) == 1) {
+        LoRa.idle();
+        LoRa.setFrequency(freq);
+        Serial.print("+SET_OK: Freq="); 
+        Serial.print(freq / 1E6); Serial.println("MHz");
+      }
+    }
+    else if (in.startsWith("b ")) {
+      long bw = 0;
+      if (sscanf(in.c_str(), "b %ld", &bw) == 1) {
+        LoRa.idle();
+        LoRa.setSignalBandwidth(bw);
+        Serial.print("+SET_OK: BW="); 
+        Serial.println(bw);
+      }
+    }
+    else if (in.startsWith("c ")) {
+      int cr = 0;
+      if (sscanf(in.c_str(), "c %d", &cr) == 1) {
+        LoRa.idle();
+        LoRa.setCodingRate4(cr);
+        Serial.print("+SET_OK: CR=4/"); 
+        Serial.println(cr);
+      }
+    }
+    else if (in.startsWith("v ")) {
+      int sf = 0;
+      if (sscanf(in.c_str(), "v %d", &sf) == 1) {
+        if (sf >= 6 && sf <= 12) {
+          updateParams(sf);
+          Serial.print("+SET_OK: SF="); 
+          Serial.println(sf);
         }
       }
     }
@@ -122,7 +163,7 @@ void loop() {
 
 void updateParams(int sf) {
   currentSF = sf;
+  LoRa.idle();
   LoRa.setSpreadingFactor(sf);
-  Serial.println(">>> RESET");
   Serial.print(">>> 接收端同步至 SF"); Serial.println(sf);
 }

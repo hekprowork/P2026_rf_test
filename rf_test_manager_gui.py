@@ -468,7 +468,7 @@ class RfTestManagerGUI(tk.Tk):
                 if not line:
                     continue
                     
-                if "RESET" in line or "同步至" in line or "[設定]" in line:
+                if "RESET" in line or "同步至" in line or "[設定]" in line or "+SET_OK:" in line:
                     self.rx_out.write(f"[STATUS] {line}\n")
                     if "RESET" in line:
                         session_stats.clear()

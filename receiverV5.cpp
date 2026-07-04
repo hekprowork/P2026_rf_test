@@ -89,8 +89,8 @@ void loop() {
       if (sscanf(in.c_str(), "f %ld", &freq) == 1) {
         LoRa.idle();
         LoRa.setFrequency(freq);
-        Serial.print("\n>>> [設定] 頻率已更改為: "); 
-        Serial.print(freq / 1E6); Serial.println(" MHz");
+        Serial.print("+SET_OK: Freq="); 
+        Serial.print(freq / 1E6); Serial.println("MHz");
       }
     }
     else if (in.startsWith("b ")) {
@@ -98,7 +98,7 @@ void loop() {
       if (sscanf(in.c_str(), "b %ld", &bw) == 1) {
         LoRa.idle();
         LoRa.setSignalBandwidth(bw);
-        Serial.print("\n>>> [設定] 頻寬已更改為: "); 
+        Serial.print("+SET_OK: BW="); 
         Serial.println(bw);
       }
     }
@@ -107,7 +107,7 @@ void loop() {
       if (sscanf(in.c_str(), "c %d", &cr) == 1) {
         LoRa.idle();
         LoRa.setCodingRate4(cr);
-        Serial.print("\n>>> [設定] 編碼率已更改為: 4/"); 
+        Serial.print("+SET_OK: CR=4/"); 
         Serial.println(cr);
       }
     }
@@ -116,6 +116,8 @@ void loop() {
       if (sscanf(in.c_str(), "v %d", &sf) == 1) {
         if (sf >= 6 && sf <= 12) {
           updateParams(sf);
+          Serial.print("+SET_OK: SF="); 
+          Serial.println(sf);
         }
       }
     }
